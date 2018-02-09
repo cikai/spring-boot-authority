@@ -60,7 +60,7 @@ public class Signup {
       return resultBuilder(false, ResponseCodes.SIGNUP_FAILURE, ResponseMessages.SIGNUP_FAILURE, username);
     }
     // 注册成功
-    return resultBuilder(true, ResponseCodes.SIGNIN_SUCCESS, ResponseMessages.SIGNUP_SUCCESS, username);
+    return resultBuilder(true, ResponseCodes.SIGNUP_SUCCESS, ResponseMessages.SIGNUP_SUCCESS, username);
   }
 
   public String resultBuilder(Boolean flag, String code, String message, String username) {
