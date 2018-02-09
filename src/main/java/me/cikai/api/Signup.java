@@ -2,7 +2,8 @@ package me.cikai.api;
 
 import com.google.gson.Gson;
 import me.cikai.common.CommonUtils;
-import me.cikai.common.Messages;
+import me.cikai.common.ResponseCodes;
+import me.cikai.common.ResponseMessages;
 import me.cikai.model.Account;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -30,46 +31,46 @@ public class Signup {
                        @RequestParam(value = "password") String password) {
     // 邮箱已存在
     if (getUserIdByField("email", email) > 0) {
-      return resultBuilder(false, "101", Messages.SIGNUP_EMAIL_EXIST, username);
+      return resultBuilder(false, ResponseCodes.SIGNUP_EMAIL_EXIST, ResponseMessages.SIGNUP_EMAIL_EXIST, username);
     }
     // 用户名已存在
     if (getUserIdByField("username", username) > 0) {
-      return resultBuilder(false, "102", Messages.SIGNUP_USERNAME_EXIST, username);
+      return resultBuilder(false, ResponseCodes.SIGNUP_USERNAME_EXIST, ResponseMessages.SIGNUP_USERNAME_EXIST, username);
     }
     // 邮箱为空
     if (email == null || email.isEmpty()) {
-      return resultBuilder(false, "103", Messages.SIGNUP_EMAIL_BLANK, username);
+      return resultBuilder(false, ResponseCodes.SIGNUP_EMAIL_BLANK, ResponseMessages.SIGNUP_EMAIL_BLANK, username);
     }
     // 邮箱格式错误
     if (!CommonUtils.checkEmail(email)) {
-      return resultBuilder(false, "107", Messages.SIGNUP_EMAIL_FORMAT_ERROR, username);
+      return resultBuilder(false, ResponseCodes.SIGNUP_EMAIL_FORMAT_ERROR, ResponseMessages.SIGNUP_EMAIL_FORMAT_ERROR, username);
     }
     // 用户名为空
     if (username == null || username.isEmpty()) {
-      return resultBuilder(false, "104", Messages.SIGNUP_USERNAME_BLANK, username);
+      return resultBuilder(false, ResponseCodes.SIGNUP_USERNAME_BLANK, ResponseMessages.SIGNUP_USERNAME_BLANK, username);
     }
     // 密码为空
     if (password == null || password.isEmpty()) {
-      return resultBuilder(false, "105", Messages.SIGNUP_PASSWORD_BLANK, username);
+      return resultBuilder(false, ResponseCodes.SIGNUP_PASSWORD_BLANK, ResponseMessages.SIGNUP_PASSWORD_BLANK, username);
     }
     // 用户注册
     Boolean register = registerUser(email, username, password);
     // 注册失败
     if (!register) {
-      return resultBuilder(false, "100", Messages.SIGNUP_FAILURE, username);
+      return resultBuilder(false, ResponseCodes.SIGNUP_FAILURE, ResponseMessages.SIGNUP_FAILURE, username);
     }
     // 注册成功
-    return resultBuilder(true, "200", Messages.SIGNUP_SUCCESS, username);
+    return resultBuilder(true, ResponseCodes.SIGNIN_SUCCESS, ResponseMessages.SIGNUP_SUCCESS, username);
   }
 
   public String resultBuilder(Boolean flag, String code, String message, String username) {
     Gson gson = new Gson();
-    Map<String, String> result = new HashMap<>(4);
+    Map<String, String> result = new LinkedHashMap<>(4);
     if (flag) {
       result.put("result", "true");
-      result.put("code", "200");
-      result.put("message", Messages.SIGNUP_SUCCESS);
+      result.put("code", code);
       result.put("user_id", String.valueOf(getUserIdByField("username", username)));
+      result.put("message", ResponseMessages.SIGNUP_SUCCESS);
       return new Gson().toJson(result);
     }
     result.put("result", "false");

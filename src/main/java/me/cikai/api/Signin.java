@@ -1,8 +1,12 @@
 package me.cikai.api;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTCreationException;
 import com.google.gson.Gson;
 import me.cikai.common.CommonUtils;
-import me.cikai.common.Messages;
+import me.cikai.common.ResponseCodes;
+import me.cikai.common.ResponseMessages;
 import me.cikai.model.Account;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -11,12 +15,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static java.util.regex.Pattern.*;
+import java.io.UnsupportedEncodingException;
 
 /**
  * @author cikai
@@ -36,17 +40,44 @@ public class Signin {
     int userId = CommonUtils.checkEmail(user) ? getUserIdByField("email", user) : getUserIdByField("username", user);
     // 检测用户是否注册
     if (userId == 0) {
-      return resultBuilder("107", Messages.SIGNIN_USER_NOT_EXIST, userId);
+      return resultBuilder(false, ResponseCodes.SIGNIN_USER_NOT_EXIST, userId, ResponseMessages.SIGNIN_USER_NOT_EXIST, "");
     }
     // 登录，检测 user_id password 是否匹配
     if (!userSignin(userId, password)) {
-      return resultBuilder("108", Messages.SIGNIN_PASSWORD_ERROR, userId);
+      return resultBuilder(false, ResponseCodes.SIGNIN_PASSWORD_ERROR, userId, ResponseMessages.SIGNIN_PASSWORD_ERROR, "");
     }
-    // 生成 token
-
-
+    // 生成 JWT
+    String secret = "";
+    String token = "";
+    try {
+      secret = new String(Files.readAllBytes(Paths.get("C:\\Users\\lenovo\\.ssh\\id_rsa")));
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    if (secret == null || secret.isEmpty()) {
+      // 服务端密钥获取失败
+      return resultBuilder(false, ResponseCodes.SERVER_PRIVATE_KEY_READ_ERROR, userId, ResponseMessages.SERVER_PRIVATE_KEY_READ_ERROR, "");
+    }
+    try {
+      Algorithm algorithm = Algorithm.HMAC256(secret);
+      token = JWT.create()
+        .withIssuer(String.valueOf(userId))
+        .sign(algorithm);
+    } catch (UnsupportedEncodingException exception) {
+      return resultBuilder(false, ResponseCodes.SERVER_ERROR, userId, ResponseMessages.SERVER_ERROR, "");
+      //UTF-8 encoding not supported
+    } catch (JWTCreationException exception) {
+      //Invalid Signing configuration / Couldn't convert Claims.
+      return resultBuilder(false, ResponseCodes.SERVER_ERROR, userId, ResponseMessages.SERVER_ERROR, "");
+    }
+    if (token == null || token.isEmpty()) {
+      // 服务端token生成错误
+      return resultBuilder(false, ResponseCodes.SERVER_ERROR, userId, ResponseMessages.SERVER_ERROR, "");
+    }
     // 存入 redis
-    return "sign in";
+
+
+    return resultBuilder(true, ResponseCodes.SIGNIN_SUCCESS, userId, ResponseMessages.SIGNIN_SUCCESS, token);
   }
 
   public int getUserIdByField(String field, String value) {
@@ -69,12 +100,20 @@ public class Signin {
     return account.getPassword().equals(password);
   }
 
-  public String resultBuilder(String code, String message, int userId) {
+  public String resultBuilder(Boolean flag, String code, int userId, String message, String token) {
     Gson gson = new Gson();
-    Map<String, String> result = new HashMap<>(4);
-    result.put("user_id", String.valueOf(userId));
+    Map<String, String> result = new LinkedHashMap<>(5);
+    if (flag) {
+      result.put("result", "true");
+      result.put("code", code);
+      result.put("user_id", String.valueOf(userId));
+      result.put("token", token);
+      result.put("message", message);
+      return gson.toJson(result);
+    }
     result.put("result", "false");
     result.put("code", code);
+    result.put("user_id", String.valueOf(userId));
     result.put("message", message);
     return gson.toJson(result);
   }
