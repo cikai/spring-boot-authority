@@ -17,6 +17,7 @@ public class ResponseCodes {
   // 1002xx 登录相关错误
   public static String SIGNIN_USER_NOT_EXIST = "100201";
   public static String SIGNIN_PASSWORD_ERROR = "100202";
+  public static String SIGNIN_ALREADY_WARNING = "100203";
   // 5001xx 系统相关错误
   public static String SERVER_ERROR = "500100";
   public static String SERVER_PRIVATE_KEY_READ_ERROR = "500101";
