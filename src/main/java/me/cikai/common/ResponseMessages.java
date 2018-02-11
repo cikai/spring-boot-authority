@@ -18,4 +18,5 @@ public class ResponseMessages {
   // 系统相关消息
   public static String SERVER_ERROR = "服务端错误！";
   public static String SERVER_PRIVATE_KEY_READ_ERROR = "服务端私钥获取失败！";
+  public static String SERVER_REDIS_CONNECT_ERROR = "Redis连接失败！";
 }

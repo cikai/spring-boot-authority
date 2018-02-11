@@ -21,4 +21,5 @@ public class ResponseCodes {
   // 5001xx 系统相关错误
   public static String SERVER_ERROR = "500100";
   public static String SERVER_PRIVATE_KEY_READ_ERROR = "500101";
+  public static String SERVER_REDIS_CONNECT_ERROR = "500102";
 }

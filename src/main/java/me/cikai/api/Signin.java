@@ -87,6 +87,7 @@ public class Signin {
       jedis.expire(String.valueOf(userId), 3600);
     } catch (JedisException e) {
       e.printStackTrace();
+      return resultBuilder(false, ResponseCodes.SERVER_REDIS_CONNECT_ERROR, userId, ResponseMessages.SERVER_REDIS_CONNECT_ERROR, token);
     } finally {
       pool.close();
     }
