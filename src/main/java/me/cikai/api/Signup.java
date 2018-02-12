@@ -8,8 +8,8 @@ import me.cikai.model.Account;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
@@ -26,9 +26,9 @@ public class Signup {
   JdbcTemplate jdbcTemplate;
 
   @RequestMapping("/signup")
-  public String signup(@RequestParam(value = "email") String email,
-                       @RequestParam(value = "username") String username,
-                       @RequestParam(value = "password") String password) {
+  public String signup(@RequestHeader(value = "email") String email,
+                       @RequestHeader(value = "username") String username,
+                       @RequestHeader(value = "password") String password) {
     // 邮箱已存在
     if (getUserIdByField("email", email) > 0) {
       return resultBuilder(false, ResponseCodes.SIGNUP_EMAIL_EXIST, ResponseMessages.SIGNUP_EMAIL_EXIST, username);

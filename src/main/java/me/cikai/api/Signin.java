@@ -11,8 +11,8 @@ import me.cikai.model.Account;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -38,8 +38,8 @@ public class Signin {
   JdbcTemplate jdbcTemplate;
 
   @RequestMapping("/signin")
-  public String signup(@RequestParam(value = "user") String user,
-                       @RequestParam(value = "password") String password) {
+  public String signup(@RequestHeader(value = "user") String user,
+                       @RequestHeader(value = "password") String password) {
     // 获取 user_id
     int userId = CommonUtils.checkEmail(user) ? getUserIdByField("email", user) : getUserIdByField("username", user);
     // 检测用户是否注册
