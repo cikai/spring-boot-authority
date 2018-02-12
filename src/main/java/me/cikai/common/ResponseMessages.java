@@ -15,6 +15,9 @@ public class ResponseMessages {
   public static String SIGNIN_PASSWORD_ERROR = "密码错误！";
   public static String SIGNIN_SUCCESS = "登录成功！";
   public static String SIGNIN_ALREADY_WARNING = "用户已登录！";
+  // 登出相关消息
+  public static String SIGNOUT_FAILURE = "登出失败！";
+  public static String SIGNOUT_SUCCESS = "登出成功！";
   // 权限相关消息
   public static String TOKEN_INVALID = "Token不合法！";
   public static String TOKEN_TIMEOUT = "Token已超时，请重新登录！";
