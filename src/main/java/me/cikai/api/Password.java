@@ -42,6 +42,7 @@ public class Password {
         return CommonUtils.resultBuilder(false, ResponseCodes.TOKEN_TIMEOUT, Integer.parseInt(userId), ResponseMessages.TOKEN_TIMEOUT, "");
       }
       jedis.expire(String.valueOf(userId), 3600);
+      jedis.close();
     } catch (JedisException e) {
       e.printStackTrace();
       return CommonUtils.resultBuilder(false, ResponseCodes.TOKEN_TIMEOUT, Integer.parseInt(userId), ResponseMessages.TOKEN_TIMEOUT, "");

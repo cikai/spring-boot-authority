@@ -90,6 +90,7 @@ public class Signin {
       }
       jedis.set(String.valueOf(userId), token);
       jedis.expire(String.valueOf(userId), 3600);
+      jedis.close();
     } catch (JedisException e) {
       e.printStackTrace();
       return CommonUtils.resultBuilder(false, ResponseCodes.SERVER_REDIS_CONNECT_ERROR, userId, ResponseMessages.SERVER_REDIS_CONNECT_ERROR, token);

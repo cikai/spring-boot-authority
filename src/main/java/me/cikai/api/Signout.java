@@ -31,6 +31,7 @@ public class Signout {
         return CommonUtils.resultBuilder(false, ResponseCodes.TOKEN_INVALID, 0, ResponseMessages.TOKEN_INVALID, "");
       }
       jedis.del(userId);
+      jedis.close();
     } catch (JedisException e) {
       e.printStackTrace();
       return CommonUtils.resultBuilder(false, ResponseCodes.SIGNOUT_FAILURE, Integer.parseInt(userId), ResponseMessages.SIGNOUT_FAILURE, "");
