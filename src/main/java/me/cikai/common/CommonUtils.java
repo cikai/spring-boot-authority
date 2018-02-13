@@ -1,10 +1,12 @@
 package me.cikai.common;
 
 import com.auth0.jwt.JWT;
-import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.gson.Gson;
+import me.cikai.model.JWTHeader;
 
+import java.io.UnsupportedEncodingException;
+import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -30,8 +32,11 @@ public class CommonUtils {
     String userId = "";
     try {
       DecodedJWT jwt = JWT.decode(token);
-      userId = jwt.getIssuer();
-    } catch (JWTDecodeException e) {
+      byte[] asBytes = Base64.getDecoder().decode(jwt.getHeader());
+      String headerJson = new String(asBytes, "utf-8");
+      JWTHeader header = new Gson().fromJson(headerJson, JWTHeader.class);
+      userId = String.valueOf(header.getUserId());
+    } catch (UnsupportedEncodingException e) {
       e.printStackTrace();
       return "";
     }

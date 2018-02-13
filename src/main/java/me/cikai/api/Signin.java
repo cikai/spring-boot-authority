@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author cikai
@@ -60,9 +62,15 @@ public class Signin {
       return CommonUtils.resultBuilder(false, ResponseCodes.SERVER_PRIVATE_KEY_READ_ERROR, userId, ResponseMessages.SERVER_PRIVATE_KEY_READ_ERROR, "");
     }
     try {
+      long timestamp = System.currentTimeMillis();
       Algorithm algorithm = Algorithm.HMAC256(secret);
+      Map<String, Object> headerClaims = new HashMap();
+      headerClaims.put("userId", userId);
+      headerClaims.put("timestamp", timestamp);
       token = JWT.create()
-        .withIssuer(String.valueOf(userId))
+        .withHeader(headerClaims)
+        .withIssuer(getUsernameById(userId))
+        .withSubject(String.valueOf(timestamp))
         .sign(algorithm);
     } catch (UnsupportedEncodingException exception) {
       return CommonUtils.resultBuilder(false, ResponseCodes.SERVER_ERROR, userId, ResponseMessages.SERVER_ERROR, "");
@@ -99,6 +107,16 @@ public class Signin {
         return account;
       });
     return account.getUserId();
+  }
+
+  public String getUsernameById(int userId) {
+    Account account = new Account();
+    jdbcTemplate.query("SELECT `username` FROM `account` WHERE `user_id`=\"" + userId + "\" ;",
+      (RowMapper) (rs, rowNumber) -> {
+        account.setUsername(rs.getString("username"));
+        return account;
+      });
+    return account.getUsername();
   }
 
   public Boolean userSignin(int userId, String password) {

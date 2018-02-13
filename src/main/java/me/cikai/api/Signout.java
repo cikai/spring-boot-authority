@@ -27,6 +27,9 @@ public class Signout {
     }
     JedisPool pool = new JedisPool(new JedisPoolConfig(), "localhost");
     try (Jedis jedis = pool.getResource()) {
+      if (jedis.get(userId) == null || !jedis.get(userId).equals(token)) {
+        return CommonUtils.resultBuilder(false, ResponseCodes.TOKEN_INVALID, 0, ResponseMessages.TOKEN_INVALID, "");
+      }
       jedis.del(userId);
     } catch (JedisException e) {
       e.printStackTrace();
