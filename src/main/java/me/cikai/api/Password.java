@@ -1,6 +1,7 @@
 package me.cikai.api;
 
 import me.cikai.common.CommonUtils;
+import me.cikai.common.RedisHelper;
 import me.cikai.common.ResponseCodes;
 import me.cikai.common.ResponseMessages;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,8 +10,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.exceptions.JedisException;
 
 /**
@@ -35,8 +34,9 @@ public class Password {
       return CommonUtils.resultBuilder(false, ResponseCodes.TOKEN_INVALID, 0, ResponseMessages.TOKEN_INVALID, "");
     }
     // 检查 token 是否有效
-    JedisPool pool = new JedisPool(new JedisPoolConfig(), "localhost");
-    try (Jedis jedis = pool.getResource()) {
+    RedisHelper redis = new RedisHelper();
+    Jedis jedis = redis.getInstance().getJedis();
+    try {
       String tokenSaved = jedis.get(userId);
       if (!token.equals(tokenSaved)) {
         return CommonUtils.resultBuilder(false, ResponseCodes.TOKEN_TIMEOUT, Integer.parseInt(userId), ResponseMessages.TOKEN_TIMEOUT, "");
@@ -46,8 +46,6 @@ public class Password {
     } catch (JedisException e) {
       e.printStackTrace();
       return CommonUtils.resultBuilder(false, ResponseCodes.TOKEN_TIMEOUT, Integer.parseInt(userId), ResponseMessages.TOKEN_TIMEOUT, "");
-    } finally {
-      pool.close();
     }
     // 更新密码
     int[] updated = jdbcTemplate.batchUpdate("UPDATE `account`" +

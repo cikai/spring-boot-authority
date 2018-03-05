@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import me.cikai.common.CommonUtils;
+import me.cikai.common.RedisHelper;
 import me.cikai.common.ResponseCodes;
 import me.cikai.common.ResponseMessages;
 import me.cikai.model.Account;
@@ -14,8 +15,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.exceptions.JedisException;
 
 import java.io.IOException;
@@ -82,8 +81,9 @@ public class Signin {
       return CommonUtils.resultBuilder(false, ResponseCodes.SERVER_ERROR, userId, ResponseMessages.SERVER_ERROR, "");
     }
     // 存入 redis，设置生存时间，单位：秒
-    JedisPool pool = new JedisPool(new JedisPoolConfig(), "localhost");
-    try (Jedis jedis = pool.getResource()) {
+    RedisHelper redis = new RedisHelper();
+    Jedis jedis = redis.getInstance().getJedis();
+    try {
       if (jedis.get(String.valueOf(userId)) != null) {
         // 检测用户是否已经登录
         return CommonUtils.resultBuilder(false, ResponseCodes.SIGNIN_ALREADY_WARNING, userId, ResponseMessages.SIGNIN_ALREADY_WARNING, token);
@@ -94,8 +94,6 @@ public class Signin {
     } catch (JedisException e) {
       e.printStackTrace();
       return CommonUtils.resultBuilder(false, ResponseCodes.SERVER_REDIS_CONNECT_ERROR, userId, ResponseMessages.SERVER_REDIS_CONNECT_ERROR, token);
-    } finally {
-      pool.close();
     }
     return CommonUtils.resultBuilder(true, ResponseCodes.SIGNIN_SUCCESS, userId, ResponseMessages.SIGNIN_SUCCESS, token);
   }
